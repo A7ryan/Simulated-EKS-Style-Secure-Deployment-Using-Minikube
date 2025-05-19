@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-service
+  namespace: application
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5678
+    targetPort: 5678
+    protocol: TCP
+  selector:
+    app: data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data
+  namespace: application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data
+  template:
+    metadata:
+      labels:
+        app: data
+    spec:
+      serviceAccountName: data-service-sa 
+      containers:
+      - name: data
+        image: hashicorp/http-echo:latest
+        ports:
+        - containerPort: 5678
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: accesskey
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: secretkey
+        - name: S3_ENDPOINT
+          value: "http://minio.application.svc.cluster.local:9000"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5678
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5678
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+
+
+
+
+# base/data-service.yaml
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: data-service
+#   namespace: application
+# spec:
+#   type: ClusterIP
+#   ports:
+#   - port: 5678
+#     targetPort: 5678
+#     protocol: TCP
+#   selector:
+#     app: data
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: data
+#   namespace: application
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: data
+#   template:
+#     metadata:
+#       labels:
+#         app: data
+#     spec:
+#       serviceAccountName: data-service-sa # Attach ServiceAccount
+#       containers:
+#       - name: data
+#         image: my-http-echo:curl-bash # Use custom image
+#         ports:
+#         - containerPort: 5678
+#         env:
+#         - name: AWS_ACCESS_KEY_ID
+#           valueFrom:
+#             secretKeyRef:
+#               name: minio-credentials
+#               key: accesskey
+#         - name: AWS_SECRET_ACCESS_KEY
+#           valueFrom:
+#             secretKeyRef:
+#               name: minio-credentials
+#               key: secretkey
+#         - name: S3_ENDPOINT
+#           value: "http://minio.application.svc.cluster.local:9000" # MinIO Service endpoint
+#         livenessProbe:
+#           httpGet:
+#             path: /
+#             port: 5678
+#           initialDelaySeconds: 15
+#           periodSeconds: 10
+#         readinessProbe:
+#           httpGet:
+#             path: /
+#             port: 5678
+#           initialDelaySeconds: 5
+#           periodSeconds: 5
+#         resources:
+#           requests:
+#             cpu: "100m"
+#             memory: "128Mi"
+#           limits:
+#             cpu: "200m"
+#             memory: "256Mi"

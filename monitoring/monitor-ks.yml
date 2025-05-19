@@ -1,0 +1,25 @@
+namespaceOverride: system
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+
+grafana:
+  namespaceOverride: system
+  adminPassword: admin123
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: True
+
+alertmanager:
+  namespaceOverride: system
+
+kubeStateMetrics:
+  namespaceOverride: system
+
+prometheus-node-exporter:
+  namespaceOverride: system

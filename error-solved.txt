@@ -1,0 +1,46 @@
+Command: minikube start --cpus=2 --memory=4096 --addons=ingress,metrics-server
+
+Error: ❌ Exiting due to MK_USAGE: Docker Desktop has only 3833MB memory but you specified 4096MB
+
+Solution: 
+    -- Open Docker Desktop
+    -- Settings -> Resources
+    -- If using WSL you cannot modify this, Therefore..
+    
+    -- You are using the WSL 2 backend, so resource limits are managed by Windows.
+       You can configure limits on the memory, CPU, and swap size allocated to WSL 2 in a .wslconfig file⁠.
+
+    -- Help 1:
+URL: https://learn.microsoft.com/en-us/windows/wsl/wsl-config#configure-global-options-with-wslconfig
+
+
+
+-------------------------------------------------------------
+
+Modified the Code
+
+-------------------------------------------------------------
+
+Enable the ingress:
+    Check for addons:
+        -- minikube addons list
+    Enable the ingess:
+        -- minikube addons enable ingress
+
+    Check if its running:
+        Source: https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+        -- kubectl get pods -n ingress-nginx
+
+-------------------------------------------------------------
+
+Add Prometheus using Helm Charts:
+    Check if prometheus and grafana already exists:
+        -- helm repo list
+
+    Source: https://betterstack.com/community/guides/monitoring/prometheus-kubernetes-helm/
+            https://helm.sh/docs/intro/cheatsheet/
+
+        -- helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+-------------------------------------------------------------
+
